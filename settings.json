@@ -1,0 +1,12 @@
+{
+  // The email template intentionally uses Outlook-only CSS (mso-hide, mso-*)
+  // which VS Code's built-in CSS linter doesn't recognise. Silence those
+  // hints project-wide — they are valid for Microsoft Outlook rendering.
+  "css.lint.unknownProperties": "ignore",
+  "css.lint.vendorPrefixes": "ignore",
+
+  // Keep the explorer tidy
+  "files.exclude": {
+    "**/__pycache__": true
+  }
+}

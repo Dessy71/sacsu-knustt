@@ -1,0 +1,171 @@
+{
+  "name": "SACSU KNUST — Fresher Registration (Webhook → Sheets → Gmail)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## SACSU KNUST · Fresher Registration pipeline\n\n**Setup checklist**\n1. **Credentials** — Google Sheets (OAuth2) on *Append to Google Sheets*, Gmail (OAuth2) on *Send Welcome Email*: sign in as the union account **sacsuknust01@gmail.com** (that address is the sender; reply-to is pre-set to it as well).\n2. **Sheet** — in the Sheets node paste your Sheet ID (from the sheet URL) and tab name (default `Sheet1`).\n   Header row must contain: `name, programme, academic-year, residence, contact, email, whatsApp, zone, branch, timestamp`.\n3. **Branding** — in *Normalize & Personalise* update the `logoUrl` + `ctaLink` constants (hosted logo URL = your deployed site + `/assets/logo.png`).\n4. **Go live** — Activate this workflow, copy the **Production** webhook URL into `config.js` on the website.\n5. **Test** —\n   `curl -X POST <WEBHOOK_URL> -H \"Content-Type: application/json\" -d \"{\"name\":\"Darko Ama\",\"programme\":\"BSc CS\",\"academic-year\":\"1\",\"residence\":\"Unity Hall\",\"contact\":\"0241234567\",\"email\":\"you@st.knust.edu.gh\",\"whatsApp\":\"0551234567\",\"zone\":\"Zone 3\",\"branch\":\"Chapel Branch\"}\"`\n",
+        "height": 460,
+        "width": 420
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -180
+      ],
+      "name": "Setup Guide"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "sacsu-registration",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -40,
+        0
+      ],
+      "name": "Webhook",
+      "webhookId": "8f3b2c1a-5d4e-4a7f-9c2b-sacsuknust01"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const b = $input.first().json.body || $input.first().json;\nconst clean = (v) => String(v == null ? '' : v).replace(/\\s+/g, ' ').trim();\nconst LEVELS = { '1': 'Level 100', '2': 'Level 200', '3': 'Level 300', '4': 'Level 400', '5': 'Level 500', '6': 'Level 600' };\nconst esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');\n\nconst name = clean(b.name);\nconst parts = name.split(' ').filter(Boolean);\nconst firstName = parts.length > 1 ? parts[parts.length - 1] : (parts[0] || 'Friend');\nconst programme = clean(b.programme);\nconst academicYear = clean(b['academic-year']);\nconst levelLabel = LEVELS[academicYear] || ('Level ' + academicYear);\nconst residence = clean(b.residence);\nconst residenceDisplay = residence || '— (continuing student)';\nconst contact = clean(b.contact);\nconst email = clean(b.email).toLowerCase();\nconst whatsApp = clean(b.whatsApp || b.whatsapp);\nconst zone = clean(b.zone);\nconst branch = clean(b.branch);\n\nconst dt = DateTime.now().setZone('Africa/Accra');\nconst submittedAt = dt.toFormat('ccc, dd LLL yyyy · HH:mm');\nconst timestamp = dt.toISO();\nconst year = String(dt.year);\n\nconst logoUrl = 'https://sacsuknust-form.vercel.app/logo.svg'; // TODO: your deployed site URL + /assets/logo.png\nconst ctaLink = 'https://chat.whatsapp.com/GYHwTReOs6X46Wjx49aNiU?mode=gi_t';                    // TODO: freshers WhatsApp circle link\n\nconst rows = [\n  ['full_name', name],\n  ['programme', programme],\n  ['level', levelLabel],\n  ['residence', residenceDisplay],\n  ['contact', contact],\n  ['email', email],\n  ['whatsapp', whatsApp],\n  ['scg_zone', zone],\n  ['scg_branch', branch],\n  ['logged_at', submittedAt]\n];\nlet jsonHtml = '{<br>';\nrows.forEach((r, i) => {\n  jsonHtml += '&nbsp;&nbsp;<span style=\"color:#F5C551\">\"' + r[0] + '\"</span><span style=\"color:#7FD1AE\">: </span><span style=\"color:#F3EEE3\">\"' + esc(r[1]) + '\"</span>' + (i < rows.length - 1 ? ',' : '') + '<br>';\n});\njsonHtml += '}';\n\nreturn [{ json: {\n  name, programme, 'academic-year': academicYear, residence, contact, email, whatsApp,\n  zone, branch, timestamp, firstName, fullName: name, levelLabel, residenceDisplay,\n  submittedAt, year, logoUrl, ctaLink, jsonHtml\n} }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        180,
+        0
+      ],
+      "name": "Normalize & Personalise"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "PASTE_YOUR_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "value": {
+            "name": "={{ $json.name }}",
+            "programme": "={{ $json.programme }}",
+            "academic-year": "={{ $json['academic-year'] }}",
+            "residence": "={{ $json.residence }}",
+            "contact": "={{ $json.contact }}",
+            "email": "={{ $json.email }}",
+            "whatsApp": "={{ $json.whatsApp }}",
+            "zone": "={{ $json.zone }}",
+            "branch": "={{ $json.branch }}",
+            "timestamp": "={{ $json.timestamp }}"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        400,
+        0
+      ],
+      "name": "Append to Google Sheets"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "=🕊️ Welcome to the family, {{ $json.firstName }} — you're logged in!",
+        "emailType": "html",
+        "message": "=<!DOCTYPE html>\n<html lang=\"en\" xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n<title>Welcome to SACSU KNUST</title>\n<style>\n  @media (max-width: 620px) {\n    .px { padding: 26px 20px !important; }\n    .h1 { font-size: 32px !important; }\n    .heroBadge { display: none !important; }\n    .stack { display: block !important; width: 100% !important; }\n  }\n</style>\n</head>\n<body style=\"margin:0;padding:0;background:#F6F1E6;\">\n  <div style=\"display:none;max-height:0;overflow:hidden;mso-hide:all;\">\n    Your SACSU KNUST registration is logged, {{ $json.firstName }} — welcome to the family! 🕊️\n  </div>\n\n  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#F6F1E6;\">\n    <tr>\n      <td align=\"center\" style=\"padding:30px 12px 40px;\">\n\n        <table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"width:600px;max-width:100%;\">\n\n          <!-- ===== Header : logo ===== -->\n          <tr>\n            <td style=\"padding:6px 4px 26px;\">\n              <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">\n                <tr>\n                  <td class=\"stack\" align=\"left\" valign=\"middle\">\n                    <img src=\"{{ $json.logoUrl }}\" width=\"176\" alt=\"SACSU KNUST\" style=\"display:block;border:0;border-radius:12px;\">\n                  </td>\n                  <td class=\"stack\" align=\"right\" valign=\"middle\" style=\"font-family:Helvetica,Arial,sans-serif;font-size:11px;letter-spacing:2px;color:#1B5E20;font-weight:bold;\">\n                    SACSU // ONBOARDING\n                  </td>\n                </tr>\n              </table>\n            </td>\n          </tr>\n\n          <!-- ===== Hero ===== -->\n          <tr>\n            <td style=\"padding:0 4px 26px;\">\n              <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">\n                <tr>\n                  <td class=\"stack\" valign=\"top\">\n                    <p style=\"margin:0 0 14px;font-family:Helvetica,Arial,sans-serif;font-size:12px;font-weight:bold;letter-spacing:2.5px;color:#1B5E20;\">\n                      SACSU KNUST · FRESHERS INTAKE {{ $json.year }}\n                    </p>\n                    <h1 class=\"h1\" style=\"margin:0 0 14px;font-family:Helvetica,Arial,sans-serif;font-size:42px;line-height:1.06;font-weight:800;color:#0C2A1D;letter-spacing:-0.5px;\">\n                      Welcome to the<br>family, {{ $json.firstName }}.\n                    </h1>\n                    <p style=\"margin:0;font-family:Helvetica,Arial,sans-serif;font-size:16px;line-height:1.55;color:#4E4A3F;\">\n                      Your seat in the Saviour Church Campus Group Union is now confirmed in our records.\n                    </p>\n                  </td>\n                  <td class=\"heroBadge\" width=\"118\" valign=\"top\" align=\"right\" style=\"padding-left:16px;\">\n                    <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\">\n                      <tr>\n                        <td align=\"center\" style=\"width:96px;height:96px;border-radius:50%;background:#1B5E20;border:3px solid #F5C551;font-size:38px;line-height:96px;color:#F5C551;font-family:Helvetica,Arial,sans-serif;\">\n                          ✝\n                        </td>\n                      </tr>\n                    </table>\n                  </td>\n                </tr>\n              </table>\n            </td>\n          </tr>\n\n          <!-- ===== White card ===== -->\n          <tr>\n            <td style=\"padding:0 0 26px;\">\n              <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#FFFFFF;border-radius:24px;\">\n                <tr>\n                  <td class=\"px\" style=\"padding:38px 40px;\">\n\n                    <p style=\"margin:0 0 16px;font-family:Helvetica,Arial,sans-serif;font-size:16px;color:#0C2A1D;\">Hi {{ $json.fullName }},</p>\n\n                    <p style=\"margin:0 0 16px;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.65;color:#4E4A3F;\">\n                      Where do I begin? Your registration landed safely and every detail has been\n                      <strong style=\"color:#1B5E20;\">logged into the SACSU database</strong> — the membership\n                      desk already sees you as one of ours, {{ $json.levelLabel }}.\n                    </p>\n\n                    <p style=\"margin:0 0 18px;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.65;color:#4E4A3F;\">\n                      And before you scroll down to your registration snapshot, here is exactly what happens next:\n                    </p>\n\n                    <!-- next steps -->\n                    <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin:0 0 26px;\">\n                      <tr>\n                        <td style=\"padding:0 0 12px;\">\n                          <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" align=\"left\">\n                            <tr>\n                              <td style=\"width:30px;height:30px;border-radius:50%;background:#F5C551;color:#12301F;font-family:Helvetica,Arial,sans-serif;font-size:14px;font-weight:bold;text-align:center;line-height:30px;\">1</td>\n                              <td style=\"padding-left:12px;font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;color:#4E4A3F;\"><strong style=\"color:#0C2A1D;\">Verification call/WhatsApp</strong> within 48 hours from your zone secretary.</td>\n                            </tr>\n                          </table>\n                        </td>\n                      </tr>\n                      <tr>\n                        <td style=\"padding:0 0 12px;\">\n                          <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" align=\"left\">\n                            <tr>\n                              <td style=\"width:30px;height:30px;border-radius:50%;background:#F5C551;color:#12301F;font-family:Helvetica,Arial,sans-serif;font-size:14px;font-weight:bold;text-align:center;line-height:30px;\">2</td>\n                              <td style=\"padding-left:12px;font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;color:#4E4A3F;\"><strong style=\"color:#0C2A1D;\">Freshers WhatsApp circle invite</strong> — your level &amp; zone group, straight to {{ $json.whatsapp }}.</td>\n                            </tr>\n                          </table>\n                        </td>\n                      </tr>\n                      <tr>\n                        <td style=\"padding:0;\">\n                          <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" align=\"left\">\n                            <tr>\n                              <td style=\"width:30px;height:30px;border-radius:50%;background:#F5C551;color:#12301F;font-family:Helvetica,Arial,sans-serif;font-size:14px;font-weight:bold;text-align:center;line-height:30px;\">3</td>\n                              <td style=\"padding-left:12px;font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;color:#4E4A3F;\"><strong style=\"color:#0C2A1D;\">Welcome service &amp; icebreaker</strong> — first Sunday service after registration closes. Bring a friend.</td>\n                            </tr>\n                          </table>\n                        </td>\n                      </tr>\n                    </table>\n\n                    <!-- CTA -->\n                    <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin:0 0 26px;\">\n                      <tr>\n                        <td style=\"border-radius:999px;background:#F5C551;\">\n                          <a href=\"{{ $json.ctaLink }}\" target=\"_blank\" style=\"display:inline-block;padding:15px 30px;border-radius:999px;font-family:Helvetica,Arial,sans-serif;font-size:15px;font-weight:bold;color:#12301F;text-decoration:none;\">\n                            Join your freshers circle →\n                          </a>\n                        </td>\n                      </tr>\n                    </table>\n\n                    <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin:0 0 24px;\">\n                      <tr><td style=\"border-top:1px solid #EDE6D6;font-size:0;line-height:0;\">&nbsp;</td></tr>\n                    </table>\n\n                    <!-- JSON snapshot -->\n                    <p style=\"margin:0 0 12px;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:bold;letter-spacing:2.5px;color:#1B5E20;\">\n                      YOUR REGISTRATION SNAPSHOT\n                    </p>\n                    <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#0C2A1D;border-radius:16px;margin:0 0 8px;\">\n                      <tr>\n                        <td style=\"padding:20px 22px;font-family:'Courier New',Courier,monospace;font-size:12.5px;line-height:1.8;color:#7FD1AE;\">\n                          <span style=\"color:#5E8F76;\">// logged to SACSU core · {{ $json.submittedAt }}</span><br>\n                          {{ $json.jsonHtml }}\n                        </td>\n                      </tr>\n                    </table>\n                    <p style=\"margin:0 0 26px;font-family:Helvetica,Arial,sans-serif;font-size:12.5px;line-height:1.6;color:#8A8474;\">\n                      Spotted a typo in your record? Reply to this email and we'll fix it before onboarding day.\n                    </p>\n\n                    <!-- signature -->\n                    <p style=\"margin:0;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.7;color:#0C2A1D;\">\n                      Grace &amp; peace,<br>\n                      <strong>The Membership Desk</strong><br>\n                      SACSU KNUST — Saviour Church Campus Group Union<br>\n                      <a href=\"mailto:sacsuknust01@gmail.com\" style=\"color:#1B5E20;font-weight:bold;text-decoration:none;\">sacsuknust01@gmail.com</a>\n                    </p>\n\n                  </td>\n                </tr>\n              </table>\n            </td>\n          </tr>\n\n          <!-- ===== Footer ===== -->\n          <tr>\n            <td align=\"center\" style=\"padding:4px 18px 0;\">\n              <p style=\"margin:0 0 12px;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-style:italic;line-height:1.6;color:#6E6759;\">\n                “For where two or three gather in my name, there am I with them.” — Matthew 18:20\n              </p>\n              <p style=\"margin:0;font-family:Helvetica,Arial,sans-serif;font-size:11.5px;line-height:1.7;color:#9A9384;\">\n                Questions or corrections? Write to\n                <a href=\"mailto:sacsuknust01@gmail.com\" style=\"color:#1B5E20;font-weight:bold;text-decoration:none;\">sacsuknust01@gmail.com</a>.\n                You're receiving this because you registered with SACSU KNUST, Kwame Nkrumah University of\n                Science &amp; Technology campus. If this wasn't you, reply “NOT ME” and we'll purge the record.\n                · Service in Unity\n              </p>\n            </td>\n          </tr>\n\n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>\n",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "SACSU KNUST · Membership Desk",
+          "replyTo": "sacsuknust01@gmail.com"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        620,
+        0
+      ],
+      "name": "Send Welcome Email"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"result\": \"success\",\n  \"message\": \"Logged into the SACSU database — welcome email dispatched.\"\n}"
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        840,
+        0
+      ],
+      "name": "Respond Success"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize & Personalise",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize & Personalise": {
+      "main": [
+        [
+          {
+            "node": "Append to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append to Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Send Welcome Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Welcome Email": {
+      "main": [
+        [
+          {
+            "node": "Respond Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false,
+  "pinData": {}
+}

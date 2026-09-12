@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="SACSU KNUST Fresher Registration — join the Saviour Church Campus Group Union, KNUST. One form, nine fields, straight into the SACSU database.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://sacsu-form.vercel.app/">
+  <meta property="og:title" content="SACSU KNUST · Fresher Registration">
+  <meta property="og:description" content="Register as a fresher of the Saviour Church Campus Group Union, KNUST — and get a personalised welcome email instantly.">
+  <meta property="og:image" content="https://sacsu-form.vercel.app/assets/logo.png">
+  <meta name="theme-color" content="#050b08">
+  <title>SACSU KNUST · Fresher Registration</title>
+  <link rel="icon" type="image/png" href="assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+
+  <!-- Animated background layers -->
+  <div class="bg" aria-hidden="true">
+    <div class="bg-grid"></div>
+    <div class="glow glow-a"></div>
+    <div class="glow glow-b"></div>
+    <div id="stars"></div>
+  </div>
+
+  <!-- Preloader -->
+  <div class="preloader" id="preloader">
+    <div class="pre-stack">
+      <img src="assets/logo.png" alt="SACSU KNUST">
+      <div class="pre-ring"></div>
+      <p>BOOTING SACSU KNUST…</p>
+    </div>
+  </div>
+
+  <!-- Top HUD -->
+  <header class="hud">
+    <a class="hud-logo" href="#" aria-label="SACSU KNUST home">
+      <img src="assets/logo.png" alt="SACSU KNUST logo">
+    </a>
+    <div class="hud-chip"><span class="dot"></span> REGISTRATION OPEN · AY 2026/27</div>
+  </header>
+
+  <main class="shell">
+
+    <!-- Left: HUD console -->
+    <aside class="console">
+      <p class="console-tag">// SACSU CORE · INTAKE TERMINAL v2.5</p>
+      <h1 class="console-title">Fresher<br><span>Registration</span></h1>
+       <p class="console-sub">
+        The Saviour Church of Ghana Students' Union - KNUST Campus Member Registration Portal. Nine fields stand between you and the
+        family. <br>
+        Every answer you type streams into the SACSU KNUST database live and a welcome email is dispatched to you the second you submit.
+      </p>
+
+      <div class="console-box" aria-hidden="true">
+        <div class="console-bar">
+          <span class="c-dot r"></span><span class="c-dot y"></span><span class="c-dot g"></span>
+          <em id="captureCount">0/9 CAPTURED</em>
+        </div>
+        <pre id="liveJson">{ }</pre>
+      </div>
+
+      <ul class="console-perks">
+        <li><i>⚡</i> Instant confirmation email sent to you</li>
+        <li><i>🛰️</i> Logged straight into the SACSU KNUST  database</li>
+        <li><i>🕊️</i> Fast-track into your fresher WhatsApp Group </li>
+      </ul>
+    </aside>
+
+    <!-- Right: wizpjrd -->
+    <section class="wizard" id="wizard" aria-label="Registration form">
+      <div class="rail" id="rail" aria-hidden="true"></div>
+
+      <div class="card-wrap" id="cardWrap">
+        <!-- step cards injected by app.js -->
+      </div>
+
+      <div class="wizard-nav">
+        <button id="backBtn" class="btn ghost" type="button">← Back</button>
+        <button id="nextBtn" class="btn neon" type="button"><span class="btn-label">Next →</span></button>
+      </div>
+
+      <p class="demo-note" id="demoNote" hidden>
+        ⚡ Demo mode — paste your n8n webhook URL into <code>config.js</code> to go live.
+      </p>
+    </section>
+  </main>
+
+  <footer class="foot">
+    © 2026 SACSU KNUST · The Saviour Church of Ghana Students' Union - KNUST Campus <br> · “Service in Unity” ·
+    <a href="/cdn-cgi/l/email-protection#5b283a38282e30352e282f6b6a1b3c363a323775383436"><span class="__cf_email__" data-cfemail="7102101202041a1f040205414031161c10181d5f121e1c">[email&#160;protected]</span></a>
+  </footer>
+
+  <!-- Success overlay -->
+  <div class="success-overlay" id="successOverlay" hidden>
+    <div class="success-card">
+      <svg class="check" viewBox="0 0 64 64" aria-hidden="true">
+        <circle cx="32" cy="32" r="29" fill="none" stroke="url(#g1)" stroke-width="3"></circle>
+        <path d="M20 33.5 28.5 42 45 24" fill="none" stroke="url(#g1)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+        <defs>
+          <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#3ddc84"></stop>
+            <stop offset="1" stop-color="#f5c551"></stop>
+          </linearGradient>
+        </defs>
+      </svg>
+      <h2 id="successTitle">You're in!</h2>
+      <p id="successText">Your record has been logged into the SACSU KNUSTdatabase.</p>
+      <p class="success-id" id="successId" hidden></p>
+      <button class="btn neon" id="againBtn" type="button"><span class="btn-label">Register another fresher</span></button>
+    </div>
+  </div>
+
+  <div id="confetti" aria-hidden="true"></div>
+
+  <noscript>
+    <p style="text-align:center;padding:20px;color:#eafff3;background:#050b08">
+      This portal needs JavaScript enabled. Please enable it to register.
+    </p>
+  </noscript>
+
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="config.js"></script>
+  <script src="app.js"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a39fe8ffbb3a932a',t:'MTc4OTIyNjU3Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+
+</html>
