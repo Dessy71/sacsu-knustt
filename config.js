@@ -15,7 +15,7 @@
 };
    ============================================================ */
 window.SACSU_CONFIG = {
-  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzr5j4CHJVJW1KrPULoy6jIMI65Gfu2OMhpRiBgnOlYerG1vGgI_Q0aqOnqtpNjWDt4CA/exec", 
+  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx7V3v8vssMLGJLg7Q8LDgLAlPe99omnZVzNA5d_l_ngKUVaQRWmfsxaAG5QeqGfa3y8w/exec", 
 };
 
 
