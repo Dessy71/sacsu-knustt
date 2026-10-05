@@ -5,8 +5,14 @@
 (function () {
   "use strict";
 
-  const CFG = window.SACSU_CONFIG || { WEBHOOK_URL: "" };
-  const WEBHOOK_URL = (CFG.WEBHOOK_URL || "").trim();
+  const CFG = window.SACSU_CONFIG || {};
+  const WEBHOOK_URL = (CFG.WEBHOOK_URL || "").trim();              // n8n (JSON body)
+  const APPS_SCRIPT_URL = (CFG.APPS_SCRIPT_URL || "").trim();      // Apps Script (text/plain body)
+  const ENDPOINT = WEBHOOK_URL
+    ? { url: WEBHOOK_URL, json: true }
+    : APPS_SCRIPT_URL
+      ? { url: APPS_SCRIPT_URL, json: false }
+      : null; // demo mode
 
   /* ---------- field definitions (one card each) ---------- */
   const req = (msg) => (v) => (v.trim() ? "" : msg);
@@ -37,7 +43,7 @@
     },
     {
       id: "residence", key: "residence", tag: "LOCATION", type: "text",
-      label: "Place of Residence", ph: "e.g. Unity Hall / Evandy- Ayeduase",
+      label: "Place of Residence", ph: "e.g. Unity Hall · On Campus",
       hint: "Hall / hostel and area. Level 100 only — we need to know where to find you.",
       when: (d) => d["academic-year"] === "1",
       validate: (v) => (v.trim().length >= 2 ? "" : "Where will we find you on campus?"),
@@ -50,7 +56,7 @@
     },
     {
       id: "email", key: "email", tag: "SIGNAL", type: "email",
-      label: "Student's Email", ph: "name@gmail.com",
+      label: "Student's Email", ph: "name@st.knust.edu.gh",
       hint: "Your personalised confirmation email lands here.",
       validate: email,
     },
@@ -63,13 +69,13 @@
     {
       id: "zone", key: "zone", tag: "CHURCH", type: "text",
       label: "SCG Zone", ph: "Which Saviour Church zone are you from?",
-      hint: "e.g. Agogo/ Greater Accra",
+      hint: "e.g. Zone 3 · Ayeduase",
       validate: req("Tell us your Saviour Church zone."),
     },
     {
       id: "branch", key: "branch", tag: "CHURCH", type: "text",
       label: "SCG Branch", ph: "Which Saviour Church branch are you from?",
-      hint: "Your home branch within the zone. e.g. Adumasa, Bonwire.",
+      hint: "Your home branch within the zone.",
       validate: req("Tell us your Saviour Church branch."),
     },
   ];
@@ -155,7 +161,7 @@
       bindStep(step);
       renderRail(steps);
       backBtn.disabled = index === 0;
-      nextBtn.querySelector(".btn-label").textContent = step.type === "review" ? "Submit to SACSU KNUST" : "Next →";
+      nextBtn.querySelector(".btn-label").textContent = step.type === "review" ? "Submit to SACSU Core " : "Next →";
       const input = cardWrap.querySelector("input");
       if (input) setTimeout(() => input.focus({ preventScroll: true }), 260);
     };
@@ -291,18 +297,19 @@
 
     try {
       let out = {};
-      if (!WEBHOOK_URL) {
+      if (!ENDPOINT) {
         await sleep(1400); // demo mode
       } else {
-        const res = await fetch(WEBHOOK_URL, {
+        const res = await fetch(ENDPOINT.url, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          // Apps Script can't answer CORS preflight → text/plain keeps it a "simple request"
+          headers: { "Content-Type": ENDPOINT.json ? "application/json" : "text/plain;charset=UTF-8" },
           body: JSON.stringify(payload),
         });
         if (!res.ok) throw new Error("HTTP " + res.status);
         out = await res.json().catch(() => ({}));
         if (out && out.result === "duplicate") { celebrateDuplicate(out); return; }
-        if (out && out.result && out.result !== "success") throw new Error(out.error || "rejected");
+        if (out && out.result && out.result !== "success") throw new Error(out.message || out.error || "rejected");
       }
       celebrate(payload, out);
     } catch (err) {
@@ -324,7 +331,7 @@
     const first = parts.length > 1 ? parts[parts.length - 1] : (parts[0] || "Friend");
     $("#successTitle").textContent = `You're in, ${first}! 🎉`;
     $("#successText").innerHTML =
-      `Your record has been logged into the <b>SACSU KNUST database</b>. A personalised welcome email with your digital member card is flying to <b>${esc(payload.email)}</b> right now — check your inbox (and spam, just in case).`;
+      `Your record has been logged into the <b>SACSU database</b>. A personalised welcome email with your digital member card is flying to <b>${esc(payload.email)}</b> right now — check your inbox (and spam, just in case).`;
     const idEl = $("#successId");
     if (out && out.memberId) {
       idEl.textContent = "MEMBER ID · " + out.memberId;
@@ -333,7 +340,7 @@
       idEl.hidden = true;
     }
     $("#successOverlay").hidden = false;
-    confetti(85);
+    confetti(70);
   }
 
   function celebrateDuplicate(out) {
@@ -408,7 +415,7 @@
     stars();
     render();
     syncConsole();
-    if (!WEBHOOK_URL) $("#demoNote").hidden = false;
+    if (!ENDPOINT) $("#demoNote").hidden = false;
 
     nextBtn.addEventListener("click", () => goNext());
     backBtn.addEventListener("click", goBack);
