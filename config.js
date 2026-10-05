@@ -8,8 +8,14 @@
      and paste it below between the quotes.
 
      While this is empty the site runs in DEMO MODE:
-     submissions animate & succeed locally but nothing is sent.
-   ============================================================ */
-window.SACSU_CONFIG = {
+     submissions animate & succeed locally but nothing is sent
+
+     window.SACSU_CONFIG = {
   WEBHOOK_URL: "https://sacsuknust.app.n8n.cloud/webhook/sacsu-registration", 
 };
+   ============================================================ */
+window.SACSU_CONFIG = {
+  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzr5j4CHJVJW1KrPULoy6jIMI65Gfu2OMhpRiBgnOlYerG1vGgI_Q0aqOnqtpNjWDt4CA/exec", 
+};
+
+
