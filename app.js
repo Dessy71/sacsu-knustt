@@ -351,7 +351,7 @@
     const first = parts.length > 1 ? parts[parts.length - 1] : (parts[0] || "Friend");
     $("#successTitle").textContent = `You're in, ${first}! 🎉`;
     $("#successText").innerHTML =
-      `Your record has been logged into the <b>SACSU database</b>. A personalised welcome email with your digital member card is flying to <b>${esc(payload.email)}</b> right now — check your inbox (and spam, just in case).`;
+      `Your record has been logged into the <b>SACSU KNUST database</b>. A personalised welcome email with your digital member card and link to SACSU KNUST FRESHERS'GROUP is flying to <b>${esc(payload.email)}</b> right now — check your inbox (and spam, just in case).`;
     const idEl = $("#successId");
     if (out && out.memberId) {
       idEl.textContent = "MEMBER ID · " + out.memberId;
@@ -360,14 +360,14 @@
       idEl.hidden = true;
     }
     $("#successOverlay").hidden = false;
-    confetti(70);
+    confetti(88);
   }
 
   function celebrateDuplicate(out) {
     document.querySelector(".success-card").classList.add("dup");
     $("#successTitle").textContent = "Already in the family! 🕊️";
     $("#successText").innerHTML =
-      "These details are already logged in the <b>SACSU database</b> — no second record was created and no second email will be sent. Your original welcome email and digital member card are still waiting in your inbox (check spam too).";
+      "These details are already logged in the <b>SACSU KNUST database</b> — no second record was created and no second email will be sent. Your original welcome email and digital member card are still waiting in your inbox (check spam too).";
     const idEl = $("#successId");
     if (out && out.memberId) {
       idEl.textContent = "MEMBER ID · " + out.memberId;
