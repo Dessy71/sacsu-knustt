@@ -3,7 +3,7 @@
    ------------------------------------------------------------
    WEBHOOK_URL
      The *production* URL of your n8n Webhook node.
-     In n8n: open the workflow → Webhook node → copy the
+     In n8n: open the workflow → Webhook node → copy thOe
      "Production" URL (looks like https://<your-n8n>/webhook/sacsu-registration)
      and paste it below between the quotes.
 
