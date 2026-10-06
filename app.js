@@ -161,7 +161,7 @@
       bindStep(step);
       renderRail(steps);
       backBtn.disabled = index === 0;
-      nextBtn.querySelector(".btn-label").textContent = step.type === "review" ? "Submit to SACSU Core " : "Next →";
+      nextBtn.querySelector(".btn-label").textContent = step.type === "review" ? "Submit to SACSU KNUST " : "Next →";
       const input = cardWrap.querySelector("input");
       if (input) setTimeout(() => input.focus({ preventScroll: true }), 260);
     };
