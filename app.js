@@ -296,25 +296,45 @@
     };
 
     try {
-      let out = {};
+      let out = null;
       if (!ENDPOINT) {
         await sleep(1400); // demo mode
+        out = {};
       } else {
-        const res = await fetch(ENDPOINT.url, {
-          method: "POST",
-          // Apps Script can't answer CORS preflight → text/plain keeps it a "simple request"
-          headers: { "Content-Type": ENDPOINT.json ? "application/json" : "text/plain;charset=UTF-8" },
-          body: JSON.stringify(payload),
-        });
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        out = await res.json().catch(() => ({}));
-        if (out && out.result === "duplicate") { celebrateDuplicate(out); return; }
-        if (out && out.result && out.result !== "success") throw new Error(out.message || out.error || "rejected");
+        const bodyStr = JSON.stringify(payload);
+        // 1) Same-origin Vercel proxy first — immune to iOS Safari's
+        //    cross-site redirect blocking (see api/submit.js).
+        if (!ENDPOINT.json && location.protocol.indexOf("http") === 0) {
+          try {
+            const pRes = await fetch("/api/submit", {
+              method: "POST",
+              headers: { "Content-Type": "text/plain;charset=UTF-8" },
+              body: bodyStr,
+            });
+            if (pRes.ok) {
+              const parsed = await pRes.json().catch(() => null);
+              if (parsed && parsed.result) out = parsed;
+            }
+          } catch (_) { /* proxy unavailable → fall through to direct */ }
+        }
+        // 2) Direct endpoint fallback (proxy not deployed, or n8n mode)
+        if (!out) {
+          const res = await fetch(ENDPOINT.url, {
+            method: "POST",
+            // Apps Script can't answer CORS preflight → text/plain keeps it a "simple request"
+            headers: { "Content-Type": ENDPOINT.json ? "application/json" : "text/plain;charset=UTF-8" },
+            body: bodyStr,
+          });
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          out = await res.json().catch(() => ({}));
+        }
+        if (out.result === "duplicate") { celebrateDuplicate(out); return; }
+        if (out.result && out.result !== "success") throw new Error(out.message || out.error || "rejected");
       }
       celebrate(payload, out);
     } catch (err) {
       console.error("Submission failed:", err);
-      setErr("Transmission failed — check your connection and hit submit again.");
+      setErr("We couldn't confirm your submission — it may still have gone through. Check your inbox for a welcome email; if none arrives within 2 minutes, hit submit once more (double entries are blocked automatically).");
       const card = cardWrap.querySelector(".step-card");
       card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
     } finally {
