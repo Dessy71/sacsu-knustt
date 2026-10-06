@@ -69,13 +69,13 @@
     {
       id: "zone", key: "zone", tag: "CHURCH", type: "text",
       label: "SCG Zone", ph: "Which Saviour Church zone are you from?",
-      hint: "e.g. Zone 3 · Ayeduase",
+      hint: "e.g. Kumasi, Agogo",
       validate: req("Tell us your Saviour Church zone."),
     },
     {
       id: "branch", key: "branch", tag: "CHURCH", type: "text",
       label: "SCG Branch", ph: "Which Saviour Church branch are you from?",
-      hint: "Your home branch within the zone.",
+      hint: "e.g. Adumasa, Madina, Jaachie",
       validate: req("Tell us your Saviour Church branch."),
     },
   ];
