@@ -1,21 +1,20 @@
 /* ============================================================
    SACSU KNUST · Fresher Registration — CONFIG
    ------------------------------------------------------------
-   WEBHOOK_URL
-     The *production* URL of your n8n Webhook node.
-     In n8n: open the workflow → Webhook node → copy thOe
-     "Production" URL (looks like https://<your-n8n>/webhook/sacsu-registration)
-     and paste it below between the quotes.
+   The site supports TWO free/automation backends. Fill in ONE:
 
-     While this is empty the site runs in DEMO MODE:
-     submissions animate & succeed locally but nothing is sent
+   APPS_SCRIPT_URL  ⭐ recommended (100% free, never expires)
+     The /exec URL of your Google Apps Script deployment
+     (see apps-script/Code.gs header for the 5-step setup).
+     Submissions are sent as text/plain so no CORS preflight is needed.
 
-     window.SACSU_CONFIG = {
-  WEBHOOK_URL: "https://sacsuknust.app.n8n.cloud/webhook/sacsu-registration", 
-};
+   WEBHOOK_URL      (optional — only if you return to n8n someday)
+     The Production URL of your n8n Webhook node.
+
+   With BOTH empty the site runs in DEMO MODE: submissions animate &
+   succeed locally but nothing is sent (gold banner shown).
    ============================================================ */
 window.SACSU_CONFIG = {
-  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwoSmrFG_WD5nXVrHpr4ppoBpuKqilSm_-441wOqt3WEf3vE22E4d29cirTrfbdP3k/exec", 
+  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxaedlXf_0nicpeL2EEg9hmmhLnwEIhXSteJHDFU7zvmk91fU-U41nPstKNkUe9bv1Q/exec",
+  WEBHOOK_URL: "",     // e.g. "https://<your-n8n>/webhook/sacsu-registration"
 };
-
-
